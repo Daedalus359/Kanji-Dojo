@@ -361,7 +361,7 @@ fun WritingPracticeVocabHeadline(
 
         else -> {
             val text = formattedVocabDefinition(word.word.reading, word.word.combinedGlossary())
-                .withEncodedText(letter)
+                //.withEncodedText(letter)
             FuriganaText(text)
         }
     }

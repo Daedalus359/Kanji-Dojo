@@ -239,12 +239,21 @@ private fun Progress(
             state = lazyListState
         ) {
 
-            items(reviewState.charactersData) {
+            //items(reviewState.charactersData) {
+            //    CharacterStateIndicator(
+            //        characterData = it,
+            //        selectedState = reviewState.selected
+            //    )
+            //}
+            items(
+                items = reviewState.charactersData.filter(::isCharacterVisible)
+            ) {
                 CharacterStateIndicator(
                     characterData = it,
                     selectedState = reviewState.selected
                 )
             }
+
 
         }
     }
@@ -285,6 +294,13 @@ private fun Input(
 }
 
 private enum class CharacterWritingDisplayState { NoWritingData, Writing, Correct, Failed }
+
+private fun isCharacterVisible(
+    characterData: VocabCharacterWritingData
+): Boolean {
+    return characterData is VocabCharacterWritingData.WithStrokes &&
+        characterData.writerState.progress.value is CharacterWritingProgress.Completed
+}
 
 @Composable
 private fun CharacterStateIndicator(
@@ -335,7 +351,7 @@ private fun CharacterStateIndicator(
     ) {
 
         Text(
-            text = characterData.character,
+            text = if (characterData.character.isEmpty()) " " else characterData.character,
             color = textColor,
             modifier = Modifier
                 .size(40.dp)
@@ -398,26 +414,53 @@ private fun AutoSwitchSelectedItemLaunchedEffect(reviewState: VocabReviewState.W
     }
 }
 
+//@Composable
+//fun AutoscrollCharacterIndicatorRowLaunchedEffect(
+//    reviewState: VocabReviewState.Writing,
+//    lazyListState: LazyListState
+//) {
+//    LaunchedEffect(reviewState) {
+//        snapshotFlow { reviewState.selected.value }
+//            .collectLatest {
+//                val index = reviewState.charactersData.indexOf(it)
+//
+//                val offset = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()
+  //                  ?.size?.times(3) ?: return@collectLatest
+//
+//                val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
+//                if (index < firstVisibleItemIndex + 3)
+//                    lazyListState.animateScrollToItem(index, -offset)
+//
+//                val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.last().index
+//                if (index > lastVisibleItemIndex - 3)
+//                    lazyListState.animateScrollToItem(index, offset)
+//            }
+//    }
+//}
+
 @Composable
 fun AutoscrollCharacterIndicatorRowLaunchedEffect(
     reviewState: VocabReviewState.Writing,
     lazyListState: LazyListState
 ) {
     LaunchedEffect(reviewState) {
-        snapshotFlow { reviewState.selected.value }
-            .collectLatest {
-                val index = reviewState.charactersData.indexOf(it)
+        snapshotFlow {
+            reviewState.charactersData.filter(::isCharacterVisible)
+        }.collectLatest { visibleCharacters ->
 
-                val offset = lazyListState.layoutInfo.visibleItemsInfo.firstOrNull()
-                    ?.size?.times(3) ?: return@collectLatest
-
-                val firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
-                if (index < firstVisibleItemIndex + 3)
-                    lazyListState.animateScrollToItem(index, -offset)
-
-                val lastVisibleItemIndex = lazyListState.layoutInfo.visibleItemsInfo.last().index
-                if (index > lastVisibleItemIndex - 3)
-                    lazyListState.animateScrollToItem(index, offset)
+            if (visibleCharacters.isEmpty()) {
+                return@collectLatest
             }
+
+            val selectedIndex = visibleCharacters.indexOf(reviewState.selected.value)
+
+            val targetIndex = if (selectedIndex >= 0) {
+                selectedIndex
+            } else {
+                visibleCharacters.lastIndex
+            }
+
+            lazyListState.animateScrollToItem(targetIndex)
+        }
     }
 }

@@ -11,7 +11,7 @@ fun getUserDataDirectory(): File {
         }
 
         osName.contains("windows", true) -> {
-            File("$userDir/AppData/Local/Kanji Dojo")
+            File("$userDir/AppData/Local/Kanji Dojo Source")
         }
 
         osName.contains("mac", true) -> {

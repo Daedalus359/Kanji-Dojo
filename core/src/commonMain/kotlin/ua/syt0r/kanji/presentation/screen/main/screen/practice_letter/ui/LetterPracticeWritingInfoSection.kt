@@ -407,7 +407,7 @@ private fun ExpressionsSection(
                             exampleWord.romaji != null -> Text(exampleWord.romaji)
                             else -> {
                                 val string = exampleWord.word.reading.formattedFurigana()
-                                    .let { if (reveal) it else it.withEncodedText(letter) }
+                                    //.let { if (reveal) it else it.withEncodedText(letter) }
                                 FuriganaText(string)
                             }
                         }

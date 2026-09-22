@@ -70,6 +70,14 @@ class DefaultGetVocabPracticeWritingDataUseCase(
                 }
                 character to characterWriterData
             }
+            .plus(
+                "" to CharacterWriterData(
+                    character = "",
+                    strokeEvaluator = strokeEvaluator,
+                    strokes = emptyList(),
+                    configuration = CharacterWriterConfiguration.CharacterInput
+                )
+            )
 
         return VocabPracticeItemData.Writing(
             meaning = card.meaning,
